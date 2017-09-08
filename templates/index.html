@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>eniLINK Documentation - Lift Template Basics</title>
+
+    <link href="../assets/bootstrap/css/bootstrap_yeti-asciidoc.min.css" rel="stylesheet">
+    <link href="../assets/bootstrap/css/custom.css" rel="stylesheet">
+    <link href="../assets/highlightjs/github.min.css" rel="stylesheet">
+
+	<style>
+		body {
+			padding-bottom: 50px;
+		}
+
+		.highlight {
+			width: 100%;
+		}
+
+		#toctitle {
+			display: none;
+		}
+
+		img {
+			display: block;
+			margin: auto; 
+			margin-top: 50px;
+			margin-bottom: 50px;
+			max-width: 100%;
+		}
+	</style>
+
+</head>
+
+<body class="container">
+
+	<div id="navigation">
+		<img src="../assets/logo.png" class="pull-right" />
+		<div class="page-header" style="padding-top: 25px; margin-right: 150px;">
+		  	<strong>
+
+			  		<a href="../index.html">&laquo; Back to Overview</a>
+
+		  	</strong><br/>
+		</div>
+	</div>
+
+	<div style="margin-top: 30px;"><h1>Lift Template Basics</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div id="toc" class="toc2">
+<div id="toctitle" class="title">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_basic_usage">2. Basic Usage</a></li>
+<li><a href="#_tags_and_snippets">3. Tags and Snippets</a></li>
+<li><a href="#_transformation">4. Transformation</a></li>
+<li><a href="#_rdfa">5. RDFa</a></li>
+</ul>
+</div>
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The eniLINK platform makes use of the
+  <a href="http://liftweb.net/">Lift web framework</a> for its web templates.<br>
+Lift itself is written in <a href="http://scala-lang.org/">Scala</a>, an object-oriented
+and functional programming language that runs in the JVM.</p>
+</div>
+<div class="paragraph">
+<p>David Pollak, Lift&#8217;s creator, describes its properties in
+  <a href="http://simply.liftweb.net/">Simply Lift</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Lift templates contain no executable code. They are pure, raw, valid HTML.
+Lift uses snippets to transform sections of the HTML page from static to dynamic. The key word is transform.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In contrast to many other templating systems, the transformation doesn&#8217;t
+concatenate string contents, but works on sequences of XML nodes that it
+transforms from input to output using <em>Snippets</em>.
+Snippets are Scala code that is referenced from, but not included in, the
+templates (hence: no executable code).</p>
+</div>
+<div class="paragraph">
+<p>Think of a Lift page template using Snippets as a collection of components that
+generate parts of the final page.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_basic_usage">2. Basic Usage</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As mentioned, Lift templates simply consist of (X)HTML tags.</p>
+</div>
+<div class="paragraph">
+<p>This does not mean that a lift template will be a complete document with
+<code>&lt;html&gt;&lt;/html&gt;</code> blocks or other <em>Chrome</em>, like David Pollak calls it.
+Instead, there typically is a default template with all of the common markup
+while the page template will just contain markup for its actual content.</p>
+</div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;div data-lift="surround?with=default;at=content" /&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This would create a page with decorations and other elements as specified in
+the default template (think CSS and scripts, like Bootstrap, jQuery etc.) but
+otherwise empty.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Lift makes heavy use of <code>data-*</code> attributes to convey parameters to the
+snippets. The attribute <code>data-lift</code>, specifically, tells Lift which snippet
+is to be <a href="http://simply.liftweb.net/index-23.1.html#sec:Snippet-Resolution">invoked</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_tags_and_snippets">3. Tags and Snippets</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In a nutshell, Lift templates combine basic tags with certain attributes
+that instruct Lift to invoke appropriate Snippets, which transform the
+tag body or content into the final output. The snippets are free to replace the
+entire tag with other markup, but they can also just add, replace, or repeat
+pieces.</p>
+</div>
+<div class="paragraph">
+<p>Lets start with a very simple example.</p>
+</div>
+<div class="listingblock">
+<div class="title">example.html</div>
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;html&gt;
+  &lt;body&gt;
+    &lt;div id="example-1" class="example" data-lift="ExampleSnippet"&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will invoke the method <code>render(in: NodeSeq): NodeSeq</code> of the class
+ExampleSnippet with the full &lt;div/&gt; tag as input XML node sequence <code>in</code>,
+and generate the output from whatever the method returns as its result.</p>
+</div>
+<div class="paragraph">
+<p>If we go for the most straight-forward implementation possible, and just
+return whatever input we receive, &#8230;</p>
+</div>
+<div class="listingblock">
+<div class="title">ExampleSnippet.scala</div>
+<div class="content">
+<pre class="highlight"><code class="scala language-scala">import scala.xml.NodeSeq
+
+class ExampleSnippet {
+  def render(in: NodeSeq): NodeSeq = {
+    in
+  }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>... the result will basically be the same page (with maybe a bit of
+re-formatting and some Lift AJAX helpers) with the div still being there,
+having all the same attributes and values (with the exception of <code>data-lift</code>
+itself).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_transformation">4. Transformation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Of course, what we actually want to do is to place dynamic content onto
+the page by transforming parts of the templates.</p>
+</div>
+<div class="paragraph">
+<p>Consider this example, slightly modified from <a href="http://simply.liftweb.net/index-7.1.html#toc-Subsection-7.1.1">Simply Lift</a>:</p>
+</div>
+<div class="listingblock">
+<div class="title">time.html</div>
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;span class="time" data-lift="CurrentTime"&gt;The time is &lt;span id="current-time"&gt;current time&lt;/span&gt;.&lt;/span&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Along with the following snippet class (see <a href="http://simply.liftweb.net/index-7.10.html#sec:CSS-Selector-Transforms">CSS transforms</a>), &#8230;</p>
+</div>
+<div class="listingblock">
+<div class="title">CurrentTime.scala</div>
+<div class="content">
+<pre class="highlight"><code class="scala language-scala">import java.util.Date
+import net.liftweb.util.Helpers._
+
+class CurrentTime {
+  def render = "#current-time" #&gt; (new Date).toString
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>... this will replace the inner span element, completely, with a string
+representation of the time the page was requested at:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;span class="time"&gt;The time is Wed Nov 02 17:39:19 CET 2016.&lt;/span&gt;</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rdfa">5. RDFa</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A very important and powerful part of the eniLINK Lift template system is
+its support for using <a href="https://www.w3.org/TR/rdfa-primer/">RDFa</a> annotations
+to query the underlying triplestore and put the query results into the
+resulting pages.</p>
+</div>
+<div class="paragraph">
+<p>The RDFa support is implemented with a Snippet, Rdfa, and as such works on
+the principles outlined above. It offers a lot of possibilities, and has
+its own documentation, which you can continue reading <a href="rdfa.html">here</a>.</p>
+</div>
+</div>
+</div></div>
+	<script src="../assets/highlightjs/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script>
+		(function(i, s, o, g, r, a, m) {
+			i['GoogleAnalyticsObject'] = r;
+			i[r] = i[r] || function() {
+				(i[r].q = i[r].q || []).push(arguments)
+			}, i[r].l = 1 * new Date();
+			a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+			a.async = 1;
+			a.src = g;
+			m.parentNode.insertBefore(a, m)
+		})(window, document, 'script',
+				'//www.google-analytics.com/analytics.js', 'ga');
+
+		ga('create', 'UA-49874284-1', 'enilink.net');
+		ga('send', 'pageview');
+	</script>
+</body>
+
+</html>

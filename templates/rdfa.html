@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>eniLINK Documentation - Lift RDFa Templates</title>
+
+    <link href="../assets/bootstrap/css/bootstrap_yeti-asciidoc.min.css" rel="stylesheet">
+    <link href="../assets/bootstrap/css/custom.css" rel="stylesheet">
+    <link href="../assets/highlightjs/github.min.css" rel="stylesheet">
+
+	<style>
+		body {
+			padding-bottom: 50px;
+		}
+
+		.highlight {
+			width: 100%;
+		}
+
+		#toctitle {
+			display: none;
+		}
+
+		img {
+			display: block;
+			margin: auto; 
+			margin-top: 50px;
+			margin-bottom: 50px;
+			max-width: 100%;
+		}
+	</style>
+
+</head>
+
+<body class="container">
+
+	<div id="navigation">
+		<img src="../assets/logo.png" class="pull-right" />
+		<div class="page-header" style="padding-top: 25px; margin-right: 150px;">
+		  	<strong>
+
+			  		<a href="../index.html">&laquo; Back to Overview</a>
+
+		  	</strong><br/>
+		</div>
+	</div>
+
+	<div style="margin-top: 30px;"><h1>Lift RDFa Templates</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div id="toc" class="toc2">
+<div id="toctitle" class="title">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_rdfa">1. RDFa</a></li>
+<li><a href="#_motivation">2. Motivation</a></li>
+<li><a href="#_example">3. Example</a></li>
+</ul>
+</div>
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rdfa">1. RDFa</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A very important and powerful part of the eniLINK
+<a href="index.html">Lift template system</a> is its support for using
+<a href="https://www.w3.org/TR/rdfa-primer/">RDFa</a> annotations to query the underlying
+triplestore and create dynamic page content from the query results.</p>
+</div>
+<div class="paragraph">
+<p>The RDFa support is implemented with a Snippet, Rdfa, and follow the
+principles outlined in the <a href="index.html">Lift template basics</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_motivation">2. Motivation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When talking about creating dynamic web pages from templates, it
+is of interest how to request content from the data storage backend that
+matches certain patterns, then filter, sort and format it in different ways
+for the output.</p>
+</div>
+<div class="paragraph">
+<p>The eniLINK platform with its base framework KOMMA are built on top of the
+Linked Data principles, using triples in graph databases or triplestores as
+the underlying information repository. As usual with triplestores, queries
+are expressed in SPARQL as a set of triple patterns.</p>
+</div>
+<div class="paragraph">
+<p>In effect, what a dynamic page request would need to to do is to bind
+certain variables from such a SPARQL query to template elements or
+attributes to create the final page. One would already know which variable
+should be <em>bound to</em> which element or attribute and could, in other words,
+add additional markup to these template elements to describe such bindings.</p>
+</div>
+<div class="paragraph">
+<p>Say we meant to display a list of certain types of resources in our
+triplestore, using some attribute as their description in the list. We would
+query for the relevant types of resources with their values for the given
+attribute, and bind those values to new elements on our final page.</p>
+</div>
+<div class="paragraph">
+<p>We would need to write a SPARQL query with variables, and code that iterated
+over the query result to generate our elements and bind the variable values
+to the attributes for these elements.</p>
+</div>
+<div class="paragraph">
+<p>Or&#8230; would we?</p>
+</div>
+<div class="paragraph">
+<p>Consider that we also knew where the variable was used in the SPARQL query,
+or what it was <em>bound from</em> in terms of our triplestore, so why not also add
+a description of that to the markup?</p>
+</div>
+<div class="paragraph">
+<p>Considering our premise from above, we could have markup for</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>a list of resources of a certain type, say <em>&lt;foaf:Person&gt;</em></p>
+</li>
+<li>
+<p>one single resource of that type, bound to a variable, say <em>?person</em></p>
+</li>
+<li>
+<p>a variable for the attribute <em>&lt;foaf:name&gt;</em> of <em>?person</em>, say <em>?name</em></p>
+</li>
+<li>
+<p>and the value of <em>?name</em> as some content on the page.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Now&#8230; the good news is that there already is markup available that helps us
+express triple patterns in terms of RDF types and properties from our
+triplestore, as needed to construct the SPARQL query. It&#8217;s called RDFa
+(Resource Description Framework in Attributes).</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="paragraph">
+<p>A key enabling technology behind these developments is the ability to add
+structured data to HTML pages directly. RDFa (Resource Description Framework
+in Attributes) is a technique that allows just that: it provides a set of
+markup attributes to augment the visual information on the Web with
+machine-readable hints.</p>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; https://www.w3.org/TR/rdfa-primer/#abstract
+</div>
+</div>
+<div class="paragraph">
+<p>While the original intention of RDFa is the reverse of what we want to use it
+for, the general idea of augmenting content with meta-information in RDF terms
+applies, and has benefits, for our use-case as well.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_example">3. Example</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Let us get back to our premise and, since we already linked to the apply it to
+<a href="https://www.w3.org/TR/rdfa-primer/#exploring-further-social-networks">Example 15</a>
+from there.</p>
+</div>
+<div class="paragraph">
+<p>As stated, the example is just using the RDFa annotations to further describe
+content on some static html page, but we want to use them to actually create
+such a page, dynamically, from a query against some triplestore with maybe
+more than one <em>&lt;foaf:Person&gt;</em>.</p>
+</div>
+<div class="listingblock">
+<div class="title">query1.html</div>
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;div data-lift="rdfa" prefix="foaf: http://xmlns.com/foaf/0.1/"&gt;
+	&lt;div vocab="http://xmlns.com/foaf/0.1/" typeof="foaf:Person"&gt;
+		&lt;p&gt;
+			&lt;span property="foaf:name" data-lift="rdf.label"&gt;&lt;/span&gt;,
+			Email: &lt;a property="foaf:mbox" data-lift="rdf.ref"&gt;&lt;/a&gt;,
+			Phone: &lt;a property="foaf:phone" data-lift="rdf.ref"&gt;&lt;/a&gt;
+		&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is the HTML from Example 15, wrapped in an extra &lt;div&gt; that
+invokes the Rdfa snippet, and with the static content replaced by an
+additional snippet invocation that will actually bind the variable values to
+the individual fields for the final page.
+Another small difference is the definition and use of the <em>foaf:</em> prefix for
+the annotations. (FIXME: vocab not supported right now!)</p>
+</div>
+<div class="paragraph">
+<p>The Rdfa snippet, when executed with those XML nodes, will create the
+following SPARQL query, as a set of triple patterns using the type and property
+information from the annotations:</p>
+</div>
+<div class="listingblock">
+<div class="title">generated SPARQL</div>
+<div class="content">
+<pre class="highlight"><code class="sparql language-sparql">prefix foaf: &lt;http://xmlns.com/foaf/0.1/&gt;
+SELECT DISTINCT ?l_ ?l__3 ?l__4 WHERE {
+	?x4 &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;http://xmlns.com/foaf/0.1/Person&gt; .
+	?x4 &lt;http://xmlns.com/foaf/0.1/name&gt; ?l_ .
+	?x4 &lt;http://xmlns.com/foaf/0.1/mbox&gt; ?l__3 .
+	?x4 &lt;http://xmlns.com/foaf/0.1/phone&gt; ?l__4 .
+}</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+We haven&#8217;t actually used named variables here, but merely used the annotations from the primer.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Supposing we had the triples from Example 15 in our triplestore, this would
+then result in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="html language-html">&lt;div data-t="1" prefix="foaf: http://xmlns.com/foaf/0.1/" xmlns:foaf="http://xmlns.com/foaf/0.1/"&gt;
+	&lt;div typeof="http://xmlns.com/foaf/0.1/Person" data-t="2" vocab="http://xmlns.com/foaf/0.1/"&gt;
+		&lt;p data-t="3"&gt;
+			&lt;span data-t="4" property="foaf:name"&gt;Alice Birpemswick&lt;/span&gt;,
+			Email: &lt;a data-t="5" property="foaf:mbox"&gt;mailto:alice@example.com&lt;/a&gt;,
+			Phone: &lt;a data-t="6" property="foaf:phone"&gt;tel:+1-617-555-7332&lt;/a&gt;
+		&lt;/p&gt;
+	&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+</div>
+</div>
+</div>
+</div></div>
+	<script src="../assets/highlightjs/highlight.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<script>
+		(function(i, s, o, g, r, a, m) {
+			i['GoogleAnalyticsObject'] = r;
+			i[r] = i[r] || function() {
+				(i[r].q = i[r].q || []).push(arguments)
+			}, i[r].l = 1 * new Date();
+			a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+			a.async = 1;
+			a.src = g;
+			m.parentNode.insertBefore(a, m)
+		})(window, document, 'script',
+				'//www.google-analytics.com/analytics.js', 'ga');
+
+		ga('create', 'UA-49874284-1', 'enilink.net');
+		ga('send', 'pageview');
+	</script>
+</body>
+
+</html>
